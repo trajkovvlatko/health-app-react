@@ -1,0 +1,5 @@
+fragment Chart on MappedResponse {
+  timestamp
+  date
+  value
+}

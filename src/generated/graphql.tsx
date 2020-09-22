@@ -19,6 +19,13 @@ export type Query = {
   findProducts?: Maybe<Array<Product>>;
   mealTypes?: Maybe<Array<MealType>>;
   profile?: Maybe<User>;
+  exercise?: Maybe<Exercise>;
+  exercises?: Maybe<Array<Exercise>>;
+  exerciseTypes?: Maybe<Array<ExerciseType>>;
+  weights?: Maybe<Array<Weight>>;
+  glucoseLevels?: Maybe<Array<GlucoseLevel>>;
+  forecast?: Maybe<ForecastResponse>;
+  charts?: Maybe<Chart>;
 };
 
 
@@ -43,6 +50,29 @@ export type QueryFindProductsArgs = {
   skip?: Maybe<Scalars['Int']>;
   take?: Maybe<Scalars['Int']>;
   name: Scalars['String'];
+};
+
+
+export type QueryExerciseArgs = {
+  id: Scalars['Int'];
+};
+
+
+export type QueryExercisesArgs = {
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryWeightsArgs = {
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
+};
+
+
+export type QueryGlucoseLevelsArgs = {
+  skip?: Maybe<Scalars['Int']>;
+  take?: Maybe<Scalars['Int']>;
 };
 
 export type Meal = {
@@ -96,6 +126,70 @@ export type Product = {
   user: User;
 };
 
+export type Exercise = {
+  __typename?: 'Exercise';
+  id: Scalars['Float'];
+  user: User;
+  exerciseType: ExerciseType;
+  duration: Scalars['Float'];
+  intensity: Scalars['Float'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type ExerciseType = {
+  __typename?: 'ExerciseType';
+  id: Scalars['Float'];
+  name: Scalars['String'];
+  image: Scalars['String'];
+  calories: Scalars['Float'];
+  active: Scalars['Boolean'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type Weight = {
+  __typename?: 'Weight';
+  id: Scalars['Float'];
+  user: User;
+  weight: Scalars['Float'];
+  measure: Scalars['String'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type GlucoseLevel = {
+  __typename?: 'GlucoseLevel';
+  id: Scalars['Float'];
+  user: User;
+  level: Scalars['Float'];
+  createdAt: Scalars['String'];
+  updatedAt: Scalars['String'];
+};
+
+export type ForecastResponse = {
+  __typename?: 'ForecastResponse';
+  glucoseLevels: Array<MappedResponse>;
+  weights: Array<MappedResponse>;
+  meals: Array<MappedResponse>;
+  exercises: Array<MappedResponse>;
+};
+
+export type MappedResponse = {
+  __typename?: 'MappedResponse';
+  timestamp: Scalars['Float'];
+  date: Scalars['String'];
+  value: Scalars['Float'];
+};
+
+export type Chart = {
+  __typename?: 'Chart';
+  exercises: Array<Exercise>;
+  glucoseLevels: Array<GlucoseLevel>;
+  weights: Array<Weight>;
+  meals: Array<Meal>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   addMeal: Meal;
@@ -103,6 +197,9 @@ export type Mutation = {
   login: UserResponse;
   register: UserResponse;
   logout: Scalars['Boolean'];
+  addExercise: Exercise;
+  addWeight: WeightResponse;
+  addGlucoseLevel: GlucoseLevel;
 };
 
 
@@ -129,6 +226,22 @@ export type MutationRegisterArgs = {
   email: Scalars['String'];
 };
 
+
+export type MutationAddExerciseArgs = {
+  input: ExerciseInput;
+};
+
+
+export type MutationAddWeightArgs = {
+  measure: Scalars['String'];
+  weight: Scalars['Int'];
+};
+
+
+export type MutationAddGlucoseLevelArgs = {
+  level: Scalars['Float'];
+};
+
 export type MealInput = {
   mealTypeId: Scalars['Float'];
   products: Array<ProductInput>;
@@ -150,6 +263,23 @@ export type UserResponse = {
   error?: Maybe<Scalars['String']>;
   user?: Maybe<User>;
 };
+
+export type ExerciseInput = {
+  exerciseTypeId: Scalars['Float'];
+  duration: Scalars['Float'];
+  intensity: Scalars['Float'];
+};
+
+export type WeightResponse = {
+  __typename?: 'WeightResponse';
+  error?: Maybe<Scalars['String']>;
+  weight?: Maybe<Weight>;
+};
+
+export type ChartFragment = (
+  { __typename?: 'MappedResponse' }
+  & Pick<MappedResponse, 'timestamp' | 'date' | 'value'>
+);
 
 export type MealFragment = (
   { __typename?: 'Meal' }
@@ -244,6 +374,29 @@ export type RegisterMutation = (
   ) }
 );
 
+export type ChartQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChartQuery = (
+  { __typename?: 'Query' }
+  & { forecast?: Maybe<(
+    { __typename?: 'ForecastResponse' }
+    & { meals: Array<(
+      { __typename?: 'MappedResponse' }
+      & ChartFragment
+    )>, exercises: Array<(
+      { __typename?: 'MappedResponse' }
+      & ChartFragment
+    )>, weights: Array<(
+      { __typename?: 'MappedResponse' }
+      & ChartFragment
+    )>, glucoseLevels: Array<(
+      { __typename?: 'MappedResponse' }
+      & ChartFragment
+    )> }
+  )> }
+);
+
 export type FindProductsQueryVariables = Exact<{
   name: Scalars['String'];
 }>;
@@ -320,6 +473,13 @@ export type ProfileQuery = (
   )> }
 );
 
+export const ChartFragmentDoc = gql`
+    fragment Chart on MappedResponse {
+  timestamp
+  date
+  value
+}
+    `;
 export const ProductFragmentDoc = gql`
     fragment Product on Product {
   id
@@ -495,6 +655,49 @@ export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<Reg
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
 export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
 export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export const ChartDocument = gql`
+    query Chart {
+  forecast {
+    meals {
+      ...Chart
+    }
+    exercises {
+      ...Chart
+    }
+    weights {
+      ...Chart
+    }
+    glucoseLevels {
+      ...Chart
+    }
+  }
+}
+    ${ChartFragmentDoc}`;
+
+/**
+ * __useChartQuery__
+ *
+ * To run a query within a React component, call `useChartQuery` and pass it any options that fit your needs.
+ * When your component renders, `useChartQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useChartQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useChartQuery(baseOptions?: Apollo.QueryHookOptions<ChartQuery, ChartQueryVariables>) {
+        return Apollo.useQuery<ChartQuery, ChartQueryVariables>(ChartDocument, baseOptions);
+      }
+export function useChartLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ChartQuery, ChartQueryVariables>) {
+          return Apollo.useLazyQuery<ChartQuery, ChartQueryVariables>(ChartDocument, baseOptions);
+        }
+export type ChartQueryHookResult = ReturnType<typeof useChartQuery>;
+export type ChartLazyQueryHookResult = ReturnType<typeof useChartLazyQuery>;
+export type ChartQueryResult = Apollo.QueryResult<ChartQuery, ChartQueryVariables>;
 export const FindProductsDocument = gql`
     query FindProducts($name: String!) {
   findProducts(name: $name) {

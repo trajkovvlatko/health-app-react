@@ -18,6 +18,14 @@ yarn
 yarn test
 ```
 
+###### Add new GraphQL types
+
+Add the types in ./src/graphql and run:
+
+```
+yarn run codegen
+```
+
 ###### Start the app
 
 ```
