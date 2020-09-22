@@ -1,0 +1,8 @@
+fragment MealProduct on MealProduct {
+  id
+  amount
+  product {
+    ...Product
+  }
+  createdAt
+}
